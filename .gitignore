@@ -1,0 +1,17 @@
+# Model Caches (Gigabytes of data)
+**/huggingface-cache/
+**/lemonade-cache/
+**/llama-data/
+**/shader-cache/
+**/shader-cache-radv/
+
+# Local configuration and logs
+**/config.json
+**/*.log
+
+# OS generated files
+.DS_Store
+.Thumbs.db
+
+# Docker volumes
+**/volumes/
