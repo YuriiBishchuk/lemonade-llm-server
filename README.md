@@ -1,144 +1,98 @@
-# Lemonade LLM Server
+# Lemonade LLM Server 🍋
 
-Локальний LLM-сервер на базі [Lemonade SDK](https://github.com/lemonade-sdk/lemonade), налаштований під два різних пристрої з екстремальною оптимізацією для кожного.
+An extremely optimized Local LLM Server configuration based on [Lemonade SDK](https://github.com/lemonade-sdk/lemonade), tailored for both AMD Vega 11 APU and NVIDIA discrete GPUs on Linux (Fedora/Bazzite).
 
-## Структура проекту
+---
 
+## 🌍 Language / Мова
+- [English](#english-version)
+- [Українська](#українська-версія)
+
+---
+
+<a name="english-version"></a>
+# English Version
+
+## Project Structure
 ```
 lemonade/
-├── server-amd/          # Конфігурація для домашнього сервера (AMD Ryzen + Vega 11)
+├── server-amd/          # Config for Home Server (AMD Ryzen + Vega 11)
 │   ├── docker-compose.yml
 │   └── start.sh
 │
-├── laptop-nvidia/       # Конфігурація для ноутбука (Intel i7 + NVIDIA, Bazzite)
+├── laptop-nvidia/       # Config for Laptop (Intel i7 + NVIDIA, Bazzite)
+│   ├── Dockerfile       # Custom CUDA-enabled build
 │   ├── docker-compose.yml
 │   └── start.sh
 │
 └── README.md
 ```
+Each directory has its own independent volumes for models, caches, and shaders to prevent environment conflicts.
 
-Кожна папка має власні незалежні `volumes` — моделі, кеш та шейдери зберігаються окремо для кожної машини.
+## Quick Start
 
----
-
-## Запуск
-
-### На сервері (AMD Vega 11)
+### On Server (AMD Vega 11)
 ```bash
 cd server-amd
+chmod +x start.sh
 ./start.sh
 ```
-API буде доступний на: **http://localhost:13305**
+API: **http://localhost:13305**
 
-### На ноутбуці (NVIDIA, з Toolbx)
+### On Laptop (NVIDIA + Bazzite/Fedora)
 ```bash
 cd laptop-nvidia
+chmod +x start.sh
 ./start.sh
 ```
-API буде доступний на: **http://localhost:13306**
+API: **http://localhost:13306**
 
----
-
-## Налаштування Podman на ноутбуці (Bazzite + Toolbx)
-
-Оскільки ноутбук використовує Bazzite (immutable Fedora), `lemonade` запускається через **Podman хост-системи** з середини Toolbx.
-
-### 1. На хості (один раз)
-```bash
-systemctl --user enable --now podman.socket
-```
-
-### 2. В Toolbx (один раз — вже налаштовано)
-```bash
-echo 'export CONTAINER_HOST=unix:///run/user/1000/podman/podman.sock' >> ~/.bashrc
-source ~/.bashrc
-```
-
-Після цього `podman` та `podman-compose` всередині Toolbx автоматично використовують демон хост-системи.
-
----
-
-## Архітектура оптимізацій
+## Optimization Architecture
 
 ### server-amd (Vega 11 — Vulkan APU mode)
+- **Unified Memory**: Enabled `GGML_VULKAN_UNIFIED_MEMORY=1`. Allows the iGPU to see all system RAM directly.
+- **ACO/GPL Shaders**: Uses `RADV_PERFTEST=aco,gpl` (Valve's shader compiler used in Steam Deck) for instant startup after the first run.
+- **MLC-style Tuning**: Graph optimization with `GGML_VULKAN_MAX_NODES=8192` and FP16 math for maximum TPS.
 
-| Параметр | Значення | Причина |
-|---|---|---|
-| `LEMONADE_BACKEND` | `vulkan` | Єдиний нативний бекенд для AMD на Linux |
-| `GGML_VULKAN_UNIFIED_MEMORY` | `1` | «Святий Грааль» APU: GPU бачить всю RAM напряму |
-| `GGML_VULKAN_PINNED_MEMORY` | `1` | Забороняє swap для тензорів моделі |
-| `RADV_PERFTEST=aco,gpl` | — | ACO — компілятор шейдерів від Valve (Steam Deck). GPL pre-link шейдери на першому запуску → наступні запуски миттєві |
-| `RADV_DEBUG=nocache_reuse` | — | Прибирає перевірку кешу при старті після першого запуску |
-| `GGML_VULKAN_MAX_NODES` | `8192` | MLC-style: GPU виконує більше операцій за один round-trip |
-| `GGML_VULKAN_F16` | `1` | FP16 математика — найбільший одиничний приріст TPS |
-| `GGML_VULKAN_CHECK_RESULTS` | `0` | Вимикає перевірку кожного dispatch (безпечно для inference) |
-| `GGML_VULKAN_WMMAMATRIX` | `0` | Vega 11 не має матричних ядер → примусово використовуємо оптимізовані compute шейдери |
-| `memlock: -1` | — | Необмежене блокування пам'яті |
-| `stack: -1` | — | Необмежений стек для потоків компілятора шейдерів |
+### laptop-nvidia (Intel + NVIDIA — True CUDA mode)
+- **Custom CUDA Build**: Since Vulkan has library conflicts in rootless Podman on immutable distros, we build a custom image based on `ghcr.io/ggml-org/llama.cpp:server-cuda`.
+- **Performance**: Achieves **~40 TPS** on GTX 1050 Ti.
+- **CDI Passthrough**: Uses `nvidia.com/gpu=all` for native driver access without host library pollution.
 
-**Volumes (AMD):**
-- `./lemonade-cache` → конфіг сервера
-- `./huggingface-cache` → завантажені моделі (HuggingFace)
-- `./llama-data` → дані Llama.cpp
-- `./shader-cache` → скомпільовані Vulkan pipeline (Mesa)
-- `./shader-cache-radv` → AMD RADV built-in шейдери
-
-> **Перший запуск**: GPL компілює шейдери (~30-60 сек). Кожен наступний запуск — миттєвий.
-
-**Очікувана швидкість на Vega 11:** ~10-15 TPS (Gemma-4-E2B)
+## Model
+Default model: **Gemma 4 b2q4** (unsloth/gemma-4-E2B-it-GGUF:Q4_0).
+- Reasoning-native multimodal model.
+- Optimized for 4GB VRAM devices.
 
 ---
 
-### laptop-nvidia (Intel i7-8750H + NVIDIA — True CUDA mode)
+<a name="українська-версія"></a>
+# Українська версія
 
-**Швидкість:** ~40 TPS (неймовірний приріст завдяки CUDA)
-**TTFT:** ~0.39 сек
+## Структура проекту
+Кожна папка містить ізольоване середовище з власними `volumes`. Це дозволяє уникнути конфліктів кешу шейдерів та конфігурацій між AMD та NVIDIA.
 
-Оскільки Vulkan має проблеми з прокиданням бібліотек в rootless Podman на Bazzite/Fedora, я написав спеціальний `Dockerfile`, який збирає справжній CUDA-образ для `lemonade`.
+## Оптимізації
 
-| Параметр | Значення | Причина |
-|---|---|---|
-| `Dockerfile` | Базується на `ghcr.io/ggml-org/llama.cpp:server-cuda` | Містить нативно скомпільований CUDA драйвер для llama.cpp |
-| `LEMONADE_BACKEND` | `system` | Змушує сервер використовувати вбудований CUDA-бінарник |
-| `devices:` | `nvidia.com/gpu=all` | Прокидання ядра відеокарти (CDI) |
-| `NVIDIA_VISIBLE_DEVICES` | `all` | Видимість для CUDA |
-| `NVIDIA_DRIVER_CAPABILITIES` | `compute,utility` | Дозволяє виконувати обчислення на GPU |
+### server-amd (Vega 11 — Vulkan APU)
+- **Unified Memory**: Увімкнено прямий доступ iGPU до всієї оперативної пам'яті.
+- **ACO/GPL**: Використання компілятора шейдерів від Valve для миттєвого запуску.
+- **FP16 Math**: Максимальна пропускна здатність для інтегрованої графіки.
 
-**Як це працює:**
-При запуску `./start.sh` Docker автоматично скомпілює образ `laptop-nvidia_lemonade-nvidia` (займе ~1-2 хвилини лише на перший раз), який об'єднує веб-інтерфейс Lemonade зі справжньою міццю NVIDIA CUDA.
-
----
+### laptop-nvidia (NVIDIA — True CUDA)
+- **Спеціальний Dockerfile**: Збирає справжній CUDA-образ для подолання обмежень Vulkan на Fedora Bazzite.
+- **Швидкість**: Близько **40 токенів на секунду** на ноутбуці.
+- **NVIDIA CDI**: Пряме прокидання драйверів у контейнер.
 
 ## Модель
+Використовується **Gemma 4 b2q4** — мультимодальна модель з вбудованим механізмом роздумів (Reasoning), квантована до Q4_0 для ідеального балансу швидкості та розуму.
 
-За замовчуванням використовується **Gemma-4-E2B-it-GGUF** (Q4_0 квантизація, найоптимальніша для швидкості):
-- Репозиторій: `unsloth/gemma-4-E2B-it-GGUF:Q4_0`
-- Версія: Instruction Tuned (`-it`)
-- Параметри: 4.6B (ефективних: ~2B через MoE)
-- Ліцензія: Apache 2.0
-
-Завантаження відбувається автоматично при першому запуску `start.sh`. Використовується оновлений, швидший бінарник сервера `lemond`.
+## Рекомендації для BIOS (AMD)
+- **UMA Frame Buffer**: AUTO або 4GB.
+- **Dual-channel RAM**: Обов'язково для подвоєння швидкості iGPU.
+- **XMP/DOCP**: Увімкніть для зниження затримок пам'яті.
 
 ---
 
-## BIOS рекомендації (для сервера з Vega 11)
-
-- **UMA Frame Buffer Size**: AUTO або 4GB — Vulkan виділить більше динамічно
-- **DOCP/XMP**: Увімкніть — швидкість RAM напряму впливає на TPS для APU
-- **Dual-channel RAM**: Обов'язково — подвоює пропускну здатність Vega 11
-- **RAM Latency**: CL14/CL16 краще, ніж висока частота з CL18+
-
----
-
-## API
-
-Сервер сумісний з OpenAI API:
-
-```bash
-curl http://localhost:13305/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "Gemma-4-E2B-it-GGUF",
-    "messages": [{"role": "user", "content": "Привіт!"}]
-  }'
-```
+## License
+Apache 2.0
