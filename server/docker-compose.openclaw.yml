@@ -2,6 +2,7 @@ services:
   openclaw:
     image: ghcr.io/openclaw/openclaw:latest
     container_name: openclaw
+    user: root
     restart: always
     ports:
       - "3000:18789" # Web UI
@@ -38,8 +39,8 @@ services:
       - OPENCLAW_GATEWAY_AUTH_TOKEN=${OPENCLAW_TOKEN:-lemonade-token}
 
     volumes:
-      - ./config:/home/node/.openclaw:Z,U
-      - ./workspace:/opt/openclaw/workspace:Z,U
+      - ./config:/root/.openclaw:Z
+      - ./workspace:/opt/openclaw/workspace:Z
       # - /var/run/docker.sock:/var/run/docker.sock:z
 
   qdrant:

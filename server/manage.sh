@@ -74,8 +74,8 @@ EOF
   }
 }
 EOF
-    # Set permissions back for the container user (1000) and make it world-writable
-    sudo chown -R 1000:1000 config workspace qdrant_data 2>/dev/null || true
+    # Set permissions for root
+    sudo chown -R root:root config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
     
     echo -e "${GREEN}✅ OpenClaw configuration verified.${NC}"
