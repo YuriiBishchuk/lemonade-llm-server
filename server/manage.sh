@@ -8,7 +8,7 @@
 REPO_USER="YuriiBishchuk"
 REPO_NAME="lemonade-llm-server"
 BRANCH="main"
-GITHUB_ZIP="https://github.com/$REPO_USER/$REPO_NAME/archive/refs/heads/$BRANCH.zip"
+GITHUB_TAR="https://github.com/$REPO_USER/$REPO_NAME/archive/refs/heads/$BRANCH.tar.gz"
 GITHUB_API="https://api.github.com/repos/$REPO_USER/$REPO_NAME/commits/$BRANCH"
 
 # Colors for output
@@ -21,7 +21,7 @@ echo -e "${BLUE}🍋 Lemonade Unified Server Manager${NC}"
 
 # 1. Check Dependencies
 check_dependencies() {
-    for cmd in curl unzip docker; do
+    for cmd in curl tar docker; do
         if ! command -v $cmd &> /dev/null; then
             echo -e "${RED}Error: $cmd is not installed.${NC}"
             exit 1
@@ -67,15 +67,15 @@ update_code() {
     if [ "$LATEST_SHA" != "$CURRENT_SHA" ]; then
         echo -e "${BLUE}New version found ($LATEST_SHA). Downloading...${NC}"
         
-        curl -L $GITHUB_ZIP -o update.zip
-        unzip -q update.zip -d update_tmp
+        curl -L $GITHUB_TAR -o update.tar.gz
+        mkdir -p update_tmp
+        tar -xzf update.tar.gz -C update_tmp --strip-components=1
         
         # Copy content from the 'server' folder of the repo to current folder
-        # The zip extracts into a folder named 'lemonade-llm-server-main'
-        cp -r update_tmp/$REPO_NAME-$BRANCH/server/* .
+        cp -r update_tmp/server/* .
         
         echo "$LATEST_SHA" > version.txt
-        rm -rf update.zip update_tmp
+        rm -rf update.tar.gz update_tmp
         echo -e "${GREEN}✅ Update applied.${NC}"
     else
         echo -e "${GREEN}✅ You are on the latest version.${NC}"
