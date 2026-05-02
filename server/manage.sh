@@ -60,12 +60,14 @@ EOF
   "gateway": {
     "controlUi": {
       "allowedOrigins": ["*"],
-      "enabled": true,
-      "dangerouslyDisableDeviceAuth": true
+      "enabled": true
     },
     "auth": {
-      "mode": "none",
+      "mode": "token",
       "token": "lemonade-token"
+    },
+    "devicePairing": {
+      "enabled": true
     }
   }
 }
@@ -138,6 +140,8 @@ deploy() {
     echo -e "${GREEN}🚀 All services are up and running!${NC}"
     echo -e "Web UI: http://$IP_ADDR:3000"
     echo -e "Direct Login: http://$IP_ADDR:3000/?token=lemonade-token"
+    echo -e "\n${BLUE}To authorize your device (if asked), run this internal command:${NC}"
+    echo -e "podman exec openclaw node /app/dist/index.js devices approve <requestId>"
 }
 
 # --- Execution ---
