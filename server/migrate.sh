@@ -44,18 +44,21 @@ cp -a . "$NEW_PATH/"
 # 4. Switch to new location
 cd "$NEW_PATH"
 
-# 5. Ensure manage.sh exists in server directory
-if [ ! -f "server/manage.sh" ]; then
-    echo -e "${BLUE}manage.sh not found in server directory. Downloading bootstrap...${NC}"
-    mkdir -p server
-    curl -L https://raw.githubusercontent.com/YuriiBishchuk/lemonade-llm-server/main/server/manage.sh -o server/manage.sh
-    chmod +x server/manage.sh
+# 5. Ensure manage.sh exists
+if [ -f "manage.sh" ]; then
+    MANAGER="./manage.sh"
+elif [ -f "server/manage.sh" ]; then
+    MANAGER="./server/manage.sh"
+else
+    echo -e "${BLUE}manage.sh not found. Downloading bootstrap...${NC}"
+    curl -L https://raw.githubusercontent.com/YuriiBishchuk/lemonade-llm-server/main/server/manage.sh -o manage.sh
+    chmod +x manage.sh
+    MANAGER="./manage.sh"
 fi
 
 # 6. Run the manager
 echo -e "${GREEN}✅ Migration complete. Starting services in new location...${NC}"
-cd server
-./manage.sh
+$MANAGER
 
 # Optional: Cleanup old directory?
 # The user might want to keep it as backup, so I won't delete it automatically, 
