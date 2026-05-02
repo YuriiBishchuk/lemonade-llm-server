@@ -95,9 +95,18 @@ All configuration is managed via a `.env` file created by the script.
 
 ---
 
+## 🔑 Default Credentials
+
+- **OpenClaw Gateway Token**: `lemonade-token` (Use this when the Web UI asks for a token).
+- **Lemonade API Key**: `lemonade-local` (Pre-configured for the agent).
+
+> [!IMPORTANT]
+> If you are on **MicroOS/Podman** and get a "Permission Denied" error in logs, run:
+> `sudo chown -R 1000:1000 ./config ./workspace ./qdrant_data`
+
 ## 📋 Prerequisites
 - **Docker** & **Docker Compose**
-- **curl** & **unzip**
+- **curl** & **tar**
 - **AMD Drivers** (for APU acceleration)
 
 ---
