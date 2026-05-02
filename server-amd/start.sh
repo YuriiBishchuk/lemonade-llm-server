@@ -18,7 +18,7 @@ echo "⏳ Waiting for server to initialize (first run compiles GPL shaders)..."
 sleep 10
 
 # Pull the model if not already cached
-echo "📦 Pulling model (Q4_K_M variant for maximum speed based on benchmarks)..."
+echo "📦 Pulling model (Gemma 4 E2B - Multimodal Reasoning variant)..."
 podman exec lemonade /opt/lemonade/lemonade pull unsloth/gemma-4-E2B-it-GGUF:Q4_K_M || true
 
 echo ""

@@ -11,6 +11,10 @@ lemonade/
 │   ├── docker-compose.yml
 │   └── start.sh
 │
+├── openclaw/            # Autonomous AI Agent (Connected to Lemonade)
+│   ├── docker-compose.yml
+│   └── start.sh
+│
 ├── laptop-nvidia/       # Config for Laptop (Intel i7 + NVIDIA, Bazzite)
 │   ├── Dockerfile       # Custom CUDA-enabled build
 │   ├── docker-compose.yml
@@ -30,7 +34,15 @@ chmod +x start.sh
 ```
 The API will be available at: **http://localhost:13305**
 
-### 2. On Laptop (NVIDIA + Bazzite/Fedora)
+### 2. Run OpenClaw Agent (Server side)
+```bash
+cd openclaw
+chmod +x start.sh
+./start.sh
+```
+The Web UI will be available at: **http://localhost:3000**
+
+### 3. On Laptop (NVIDIA + Bazzite/Fedora)
 ```bash
 cd laptop-nvidia
 chmod +x start.sh
@@ -110,10 +122,10 @@ Optimized for NVIDIA discrete GPUs using a custom CUDA-enabled container to bypa
 ---
 
 ## Model
-The configuration uses **Gemma 2 2.6B** (`unsloth/gemma-2-2b-it-GGUF:Q4_K_M`) by default:
-- **Type**: Reasoning-native multimodal model.
-- **Quantization**: **Q4_K_M** (Proven to be ~12% faster than Q4_0 on this hardware).
-- **VRAM**: Fits perfectly in 4GB devices (~2.8GB total usage).
+The configuration uses **Gemma 4 E2B (Multimodal)** (`unsloth/gemma-4-E2B-it-GGUF:Q4_K_M`) by default:
+- **Type**: Reasoning-native multimodal model (Text + Vision).
+- **Quantization**: **Q4_K_M** (Optimal speed/accuracy balance).
+- **VRAM**: Fits perfectly in 4GB devices (~3.1GB total usage).
 
 ---
 
