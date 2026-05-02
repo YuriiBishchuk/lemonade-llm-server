@@ -1,8 +1,7 @@
 services:
   lemonade:
-    image: ghcr.io/lemonade-sdk/lemonade-server:latest
+    build: .
     container_name: lemonade
-    command: ["/opt/lemonade/lemond", "--host", "0.0.0.0"]
     restart: always
     ports:
       - "13305:13305"
@@ -11,50 +10,25 @@ services:
     extra_hosts:
       - "host.containers.internal:host-gateway"
     devices:
+      # KFD is required for ROCm compute
+      - /dev/kfd:/dev/kfd
       - /dev/dri:/dev/dri
-    # CPUSet: pin to physical cores only (no hyperthreading siblings).
-    # Uncomment and adjust for your Ryzen core count:
-    # cpuset: "0-3"
+    # Security options to allow device access in rootless podman
+    security_opt:
+      - label=disable
     environment:
-      # === BACKEND ===
-      - LEMONADE_BACKEND=vulkan
-      - LEMONADE_LLAMACPP=vulkan
-
-      # === UNIFIED MEMORY (APU "Holy Grail") ===
-      # Eliminates CPU<->GPU copy overhead. Critical for Vega 11 shared RAM.
-      - GGML_VULKAN_UNIFIED_MEMORY=1
-      # Pins host memory so it cannot be swapped out during inference.
-      - GGML_VULKAN_PINNED_MEMORY=1
-
-      # === SHADER / DRIVER TUNING (AMD-specific) ===
-      # ACO: Valve's fastest shader compiler (same as Steam Deck).
-      # GPL: Pre-links shader pipelines on first run -> fast on all subsequent runs.
-      - RADV_PERFTEST=aco,gpl
-      # Disable pipeline cache staleness check -> faster cold start after first run.
-      - RADV_DEBUG=nocache_reuse
-
-      # === MLC-STYLE MATH TUNING ===
-      # Larger compute graph = GPU does more work per CPU round-trip.
-      # === EXTREME TURBO TUNING ===
-      # Larger graph for complex reasoning
-      - GGML_VULKAN_MAX_NODES=16384
-      # Optimal batch for Vega 11 (balances latency and throughput)
-      - GGML_VULKAN_MAX_BATCH_SIZE=512
-      # Multi-queue submission for AMD GCN/RDNA
-      - GGML_VULKAN_MAX_QUEUES=2
-      - GGML_VULKAN_F16=1
-      - GGML_VULKAN_CHECK_RESULTS=0
-      - GGML_VULKAN_WMMAMATRIX=0
-
-      # === DEVICE ===
-      - GGML_VULKAN_DEVICE=0
-
+      # === ROCm HACK (Vega 11 / gfx902) ===
+      # Emulate gfx900 (Vega 10/64) to bypass "unsupported" check
+      - HSA_OVERRIDE_GFX_VERSION=9.0.0
+      # Disable SDMA to prevent crashes on some APUs
+      - HSA_ENABLE_SDMA=0
+      # Force Lemonade to use the system llama-server built with ROCm
+      - LEMONADE_BACKEND=system
+      
     ulimits:
-      # Unlimited memory locking: model tensors stay in RAM, never hit swap.
       memlock:
         soft: -1
         hard: -1
-      # Unlimited stack size for shader compiler threads.
       stack:
         soft: -1
         hard: -1
@@ -63,27 +37,6 @@ services:
       - ./lemonade-cache:/root/.cache/lemonade:Z
       - ./huggingface-cache:/root/.cache/huggingface:Z
       - ./llama-data:/opt/lemonade/llama:Z
-      # Persist compiled Vulkan shader cache (GPL pipelines + RADV built-ins).
-      # Without this, shaders are recompiled from scratch on every container restart.
-      - ./shader-cache:/root/.cache/mesa_shader_cache:Z
-      - ./shader-cache-radv:/root/.cache/radv_builtin_shaders:Z
-
-# =====================================================================
-# EXTREME OPTIMIZATION NOTES — AMD Ryzen APU / Vega 11
-# =====================================================================
-# BIOS:
-#   - UMA Frame Buffer Size: AUTO or 4GB (Vulkan allocates more dynamically)
-#   - Enable DOCP/XMP for your RAM (faster RAM = faster inference directly)
-#   - Disable C-states for the duration of inference if power allows
-#
-# RAM:
-#   - Latency (CL14/CL16) matters more than frequency for APUs.
-#   - Dual-channel is mandatory for full Vega bandwidth.
-#
-# First run note:
-#   - GPL shader pre-compilation happens on first load — this is intentional.
-#   - Every subsequent run will be at maximum speed from token 1.
-# =====================================================================
 
 networks:
   proxy-network:

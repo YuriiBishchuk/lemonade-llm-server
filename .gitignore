@@ -15,3 +15,6 @@
 
 # Docker volumes
 **/volumes/
+
+# Benchmarks
+benchmarks/
