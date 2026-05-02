@@ -1,17 +1,14 @@
 #!/bin/bash
 
-# ============================================================
-# Lemonade & OpenClaw Unified Management Script
-# ============================================================
+# Lemonade Unified Server Manager
+# Optimized for MicroOS / Podman / Docker
 
-# Configuration
-REPO_USER="YuriiBishchuk"
-REPO_NAME="lemonade-llm-server"
-BRANCH="main"
-GITHUB_TAR="https://github.com/$REPO_USER/$REPO_NAME/archive/refs/heads/$BRANCH.tar.gz"
-GITHUB_API="https://api.github.com/repos/$REPO_USER/$REPO_NAME/commits/$BRANCH"
+set -e
 
-# Colors for output
+GITHUB_API="https://api.github.com/repos/YuriiBishchuk/lemonade-llm-server/commits/main"
+GITHUB_TAR="https://github.com/YuriiBishchuk/lemonade-llm-server/archive/refs/heads/main.tar.gz"
+
+# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -46,7 +43,7 @@ OPENCLAW_TOKEN=lemonade-token
 EOF
         echo -e "${GREEN}✅ .env file created.${NC}"
 
-        # Generate OpenClaw JSON config to bypass CORS and set token
+        # Generate OpenClaw JSON config
         mkdir -p config
         cat > config/openclaw.json <<EOF
 {
@@ -72,7 +69,7 @@ EOF
   }
 }
 EOF
-        # Fix permissions for Podman/Docker
+        # Fix permissions
         sudo chown -R 1000:1000 config workspace qdrant_data 2>/dev/null || true
         chmod -R 777 config workspace qdrant_data 2>/dev/null || true
         
@@ -84,18 +81,15 @@ EOF
 update_code() {
     echo -e "${BLUE}Checking for updates...${NC}"
     
-    # Get latest commit SHA
     LATEST_SHA=$(curl -s $GITHUB_API | grep '"sha":' | head -n 1 | cut -d '"' -f 4)
     
     if [ -z "$LATEST_SHA" ]; then
-        echo -e "${RED}Warning: Could not check for updates (GitHub API limit or network issue).${NC}"
+        echo -e "${RED}Warning: Could not check for updates.${NC}"
         return
     fi
 
     CURRENT_SHA=""
-    if [ -f version.txt ]; then
-        CURRENT_SHA=$(cat version.txt)
-    fi
+    [ -f version.txt ] && CURRENT_SHA=$(cat version.txt)
 
     if [ "$LATEST_SHA" != "$CURRENT_SHA" ]; then
         echo -e "${BLUE}New version found ($LATEST_SHA). Downloading...${NC}"
@@ -104,8 +98,8 @@ update_code() {
         mkdir -p update_tmp
         tar -xzf update.tar.gz -C update_tmp --strip-components=1
         
-        # Copy content from the 'server' folder of the repo to current folder
-        cp -r update_tmp/server/* .
+        # Use sudo for copy to avoid permission issues with mapped volumes
+        sudo cp -r update_tmp/server/* . 2>/dev/null || cp -r update_tmp/server/* .
         
         echo "$LATEST_SHA" > version.txt
         rm -rf update.tar.gz update_tmp
@@ -119,23 +113,28 @@ update_code() {
 deploy() {
     echo -e "${BLUE}Deploying containers...${NC}"
     
-    # Create network if not exists
     docker network inspect proxy-network >/dev/null 2>&1 || \
         docker network create proxy-network
 
-    # Start model
-    echo -e "${BLUE}Starting Lemonade Model...${NC}"
-    docker compose -f docker-compose.model.yml up -d --pull always
+    # Use 'docker compose' or 'podman-compose'
+    COMPOSE_CMD="docker compose"
+    if ! command -v docker-compose &> /dev/null && ! docker help compose &> /dev/null; then
+        if command -v podman-compose &> /dev/null; then
+            COMPOSE_CMD="podman-compose"
+        fi
+    fi
 
-    # Start OpenClaw
+    echo -e "${BLUE}Starting Lemonade Model...${NC}"
+    $COMPOSE_CMD -f docker-compose.model.yml up -d --pull always
+
     echo -e "${BLUE}Starting OpenClaw...${NC}"
-    docker compose -f docker-compose.openclaw.yml up -d --pull always
+    $COMPOSE_CMD -f docker-compose.openclaw.yml up -d --pull always
     
     echo -e "${GREEN}🚀 All services are up and running!${NC}"
-    echo -e "Web UI: http://localhost:3000"
+    echo -e "Web UI: http://$(hostname -I | awk '{print $1}'):3000"
 }
 
-# Main Execution
+# --- Execution ---
 check_dependencies
 init_env
 update_code
