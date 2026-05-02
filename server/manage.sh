@@ -42,10 +42,11 @@ OPENCLAW_API_KEY=lemonade-local
 OPENCLAW_TOKEN=lemonade-token
 EOF
         echo -e "${GREEN}✅ .env file created.${NC}"
+    fi
 
-        # Generate OpenClaw JSON config
-        mkdir -p config
-        cat > config/openclaw.json <<EOF
+    # Always ensure OpenClaw JSON config is correct
+    mkdir -p config
+    cat > config/openclaw.json <<EOF
 {
   "gateway": {
     "controlUi": {
@@ -69,12 +70,11 @@ EOF
   }
 }
 EOF
-        # Fix permissions
-        sudo chown -R 1000:1000 config workspace qdrant_data 2>/dev/null || true
-        chmod -R 777 config workspace qdrant_data 2>/dev/null || true
-        
-        echo -e "${GREEN}✅ OpenClaw configuration generated.${NC}"
-    fi
+    # Fix permissions
+    sudo chown -R 1000:1000 config workspace qdrant_data 2>/dev/null || true
+    chmod -R 777 config workspace qdrant_data 2>/dev/null || true
+    
+    echo -e "${GREEN}✅ OpenClaw configuration verified.${NC}"
 }
 
 # 3. Update Code from GitHub
