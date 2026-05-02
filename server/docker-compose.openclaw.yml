@@ -30,11 +30,11 @@ services:
       - OPENCLAW_WORKSPACE_DIR=/opt/openclaw/workspace
       
       # === SANDBOX / SECURITY ===
-      - OPENCLAW_ENABLE_SANDBOX=true
       - OPENCLAW_GATEWAY_CONTROL_UI_ALLOWED_ORIGINS=*
+      - OPENCLAW_GATEWAY_AUTH_TOKEN=${OPENCLAW_TOKEN:-lemonade-token}
 
     volumes:
-      - ./config:/root/.openclaw:Z
+      - ./config:/home/node/.openclaw:Z
       - ./workspace:/opt/openclaw/workspace:Z
       # - /var/run/docker.sock:/var/run/docker.sock:z
 

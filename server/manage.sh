@@ -42,6 +42,7 @@ TELEGRAM_BOT_TOKEN=$TG_TOKEN
 TELEGRAM_CHAT_ID=$TG_CHAT_ID
 OPENCLAW_MODEL=user.gemma-4-E2B-it-GGUF-Q4_K_M
 OPENCLAW_API_KEY=lemonade-local
+OPENCLAW_TOKEN=lemonade-token
 EOF
         echo -e "${GREEN}✅ .env file created.${NC}"
     fi
