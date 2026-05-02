@@ -45,6 +45,35 @@ OPENCLAW_API_KEY=lemonade-local
 OPENCLAW_TOKEN=lemonade-token
 EOF
         echo -e "${GREEN}✅ .env file created.${NC}"
+
+        # Generate OpenClaw JSON config to bypass CORS and set token
+        mkdir -p config
+        cat > config/openclaw.json <<EOF
+{
+  "gateway": {
+    "controlUi": {
+      "allowedOrigins": ["*"]
+    },
+    "auth": {
+      "token": "lemonade-token"
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true
+    }
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.4.29",
+    "lastTouchedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  }
+}
+EOF
+        # Fix permissions for Podman/Docker
+        sudo chown -R 1000:1000 config workspace qdrant_data 2>/dev/null || true
+        chmod -R 777 config workspace qdrant_data 2>/dev/null || true
+        
+        echo -e "${GREEN}✅ OpenClaw configuration generated.${NC}"
     fi
 }
 
