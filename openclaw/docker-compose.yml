@@ -1,6 +1,6 @@
 services:
   openclaw:
-    image: ghcr.io/openclaw/openclaw:latest
+    build: .
     container_name: openclaw
     restart: always
     ports:
