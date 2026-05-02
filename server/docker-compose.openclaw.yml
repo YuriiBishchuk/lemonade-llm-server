@@ -31,6 +31,7 @@ services:
       
       # === SANDBOX / SECURITY ===
       - OPENCLAW_ENABLE_SANDBOX=true
+      - OPENCLAW_GATEWAY_CONTROL_UI_ALLOWED_ORIGINS=*
 
     volumes:
       - ./config:/root/.openclaw:Z
