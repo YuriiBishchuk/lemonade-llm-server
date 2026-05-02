@@ -1,6 +1,6 @@
 services:
   lemonade:
-    build: .
+    image: ghcr.io/lemonade-sdk/lemonade-server:latest
     container_name: lemonade
     restart: always
     ports:
@@ -10,21 +10,27 @@ services:
     extra_hosts:
       - "host.containers.internal:host-gateway"
     devices:
-      # KFD is required for ROCm compute
-      - /dev/kfd:/dev/kfd
       - /dev/dri:/dev/dri
-    # Security options to allow device access in rootless podman
-    security_opt:
-      - label=disable
     environment:
-      # === ROCm HACK (Vega 11 / gfx902) ===
-      # Emulate gfx900 (Vega 10/64) to bypass "unsupported" check
-      - HSA_OVERRIDE_GFX_VERSION=9.0.0
-      # Disable SDMA to prevent crashes on some APUs
-      - HSA_ENABLE_SDMA=0
-      # Force Lemonade to use the system llama-server built with ROCm
-      - LEMONADE_BACKEND=system
+      # === BACKEND (Vulkan Baseline - The Speed King) ===
+      - LEMONADE_BACKEND=vulkan
+      - LEMONADE_LLAMACPP=vulkan
+      - GGML_VULKAN_DEVICE=0
+
+      # === APU OPTIMIZATIONS ===
+      # Critical for APUs: Zero-copy access to system RAM
+      - GGML_VULKAN_UNIFIED_MEMORY=1
+      - GGML_VULKAN_PINNED_MEMORY=1
       
+      # === DRIVER TUNING ===
+      # Use Valve's ACO compiler + GPL for instant response
+      - RADV_PERFTEST=aco,gpl
+      - RADV_DEBUG=nocache_reuse
+      
+      # === HOST OPTIMIZATION ===
+      # Pinning to physical cores still helps Vulkan management
+      - OMP_NUM_THREADS=4
+
     ulimits:
       memlock:
         soft: -1
@@ -37,6 +43,9 @@ services:
       - ./lemonade-cache:/root/.cache/lemonade:Z
       - ./huggingface-cache:/root/.cache/huggingface:Z
       - ./llama-data:/opt/lemonade/llama:Z
+      # Persistent shader cache for instant start after reboot
+      - ./shader-cache:/root/.cache/mesa_shader_cache:Z
+      - ./shader-cache-radv:/root/.cache/radv_builtin_shaders:Z
 
 networks:
   proxy-network:

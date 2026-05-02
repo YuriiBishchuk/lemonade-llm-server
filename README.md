@@ -42,14 +42,16 @@ The API will be available at: **http://localhost:13306**
 
 ## Optimization Architecture
 
-### server-amd (Vega 11 — ROCm GPU Offloading)
-Optimized for **GPU offloading** to keep CPU cores free for other services. This uses a custom ROCm build and architectural overrides to enable compute on the "unsupported" Vega 11 APU.
+### server-amd (Vega 11 — Optimized Vulkan Mode)
+After final analysis, **Vulkan Baseline** with RADV/ACO tuning was chosen as the primary backend. It provides the highest raw throughput (44 TPS Prompt / 35 TPS Gen) while maintaining excellent stability on AMD APUs.
 
 | Parameter | Value | Reason |
 |---|---|---|
-| `Dockerfile` | Custom multi-stage | Combines ROCm drivers with Lemonade binaries |
-| `HSA_OVERRIDE_GFX_VERSION` | `9.0.0` | Emulates gfx900 to bypass driver restrictions |
-| `LEMONADE_BACKEND` | `system` | Forces use of the ROCm-enabled llama-server |
+| `LEMONADE_BACKEND` | `vulkan` | Native high-performance backend |
+| `GGML_VULKAN_UNIFIED_MEMORY` | `1` | **APU Optimization:** Shared RAM access without copy overhead |
+| `RADV_PERFTEST` | `aco,gpl` | Uses Valve's ACO compiler for fastest shader execution |
+| `OMP_NUM_THREADS` | `4` | Physical core pinning for host side processing |
+
 
 #### Phase 1: Exhaustive Configuration Test
 *Tested with TinyLlama 1.1B to find the best backend & driver settings*
@@ -87,8 +89,8 @@ Optimized for **GPU offloading** to keep CPU cores free for other services. This
 3. **Optimal Quantization (Q4_K_M):**
    `Q4_K_M` was consistently faster than the simpler `Q4_0`. It provides the best balance of reasoning quality and speed, fitting perfectly within the Vega 11's memory controller constraints.
 
-4. **Why ROCm? (GPU Offloading):**
-   While CPU-only is fast, we chose the **ROCm (Hacked)** backend for the final production build to **offload the CPU**. This keeps the 4 physical Ryzen cores available for the OS, proxy services, and the OpenClaw development environment, while the dedicated Vega 11 cores handle the heavy matrix math.
+4. **Final Choice: Vulkan (The Performance King):**
+   While ROCm offloading was tested, the **Vulkan Backend** (`vulkan`) using native `RADV/ACO` drivers provided the absolute maximum throughput (**44.08 TPS Prompt / 35.21 TPS Gen**). This configuration leverages the APU's architecture most efficiently, providing a near-instant response in the OpenClaw development environment.
 
 ---
 
