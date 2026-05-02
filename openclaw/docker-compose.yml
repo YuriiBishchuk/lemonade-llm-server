@@ -17,6 +17,10 @@ services:
       - OPENCLAW_VECTOR_STORE=qdrant
       - OPENCLAW_QDRANT_URL=http://qdrant:6333
       
+      # === WEB SEARCH (SearXNG - Free & Private) ===
+      - OPENCLAW_SEARCH_ENGINE=searxng
+      - OPENCLAW_SEARXNG_URL=http://searxng:8080
+      
       # === WORKSPACE ===
       - OPENCLAW_WORKSPACE_DIR=/opt/openclaw/workspace
       
@@ -38,6 +42,19 @@ services:
       - proxy-network
     volumes:
       - ./qdrant_data:/qdrant/storage:Z
+
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: always
+    ports:
+      - "8081:8080" # Web UI (Internal 8080)
+    networks:
+      - proxy-network
+    volumes:
+      - ./searxng:/etc/searxng:Z
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:8081
 
 networks:
   proxy-network:

@@ -13,6 +13,7 @@ lemonade/
 │
 ├── openclaw/            # Autonomous AI Agent (Connected to Lemonade)
 │   ├── qdrant_data/     # Vector database storage (Long-term memory)
+│   ├── searxng/         # Free & Private Search Engine
 │   ├── docker-compose.yml
 │   └── start.sh
 │
