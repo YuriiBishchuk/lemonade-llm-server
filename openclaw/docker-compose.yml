@@ -8,23 +8,36 @@ services:
     networks:
       - proxy-network
     environment:
-      # === LLM CONFIGURATION (Connecting to your Lemonade Server) ===
+      # === LLM CONFIGURATION ===
       - OPENCLAW_API_BASE_URL=http://lemonade:13305/v1
       - OPENCLAW_MODEL=user.gemma-4-E2B-it-GGUF-Q4_K_M
-      - OPENCLAW_API_KEY=lemonade-local # Lemonade doesn't require keys, but some agents do
+      - OPENCLAW_API_KEY=lemonade-local
+      
+      # === VECTOR STORE (Qdrant) ===
+      - OPENCLAW_VECTOR_STORE=qdrant
+      - OPENCLAW_QDRANT_URL=http://qdrant:6333
       
       # === WORKSPACE ===
       - OPENCLAW_WORKSPACE_DIR=/opt/openclaw/workspace
       
       # === SANDBOX / SECURITY ===
-      # OpenClaw can execute commands. Ensure it runs in a restricted environment.
       - OPENCLAW_ENABLE_SANDBOX=true
 
     volumes:
       - ./config:/root/.openclaw:Z
       - ./workspace:/opt/openclaw/workspace:Z
-      # Mounting docker socket allows OpenClaw to spawn its own sandbox containers if needed
       - /var/run/docker.sock:/var/run/docker.sock:z
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: always
+    ports:
+      - "6333:6333"
+    networks:
+      - proxy-network
+    volumes:
+      - ./qdrant_data:/qdrant/storage:Z
 
 networks:
   proxy-network:

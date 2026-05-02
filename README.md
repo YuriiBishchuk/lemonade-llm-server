@@ -12,6 +12,7 @@ lemonade/
 │   └── start.sh
 │
 ├── openclaw/            # Autonomous AI Agent (Connected to Lemonade)
+│   ├── qdrant_data/     # Vector database storage (Long-term memory)
 │   ├── docker-compose.yml
 │   └── start.sh
 │
