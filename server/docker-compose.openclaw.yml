@@ -1,8 +1,6 @@
 services:
   openclaw:
-    build: 
-      context: ./openclaw
-      dockerfile: Dockerfile
+    image: ghcr.io/openclaw/openclaw:latest
     container_name: openclaw
     restart: always
     ports:
