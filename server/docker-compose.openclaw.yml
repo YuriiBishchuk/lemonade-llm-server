@@ -1,6 +1,8 @@
 services:
   openclaw:
-    build: .
+    build: 
+      context: ./openclaw
+      dockerfile: Dockerfile
     container_name: openclaw
     restart: always
     ports:
@@ -10,8 +12,8 @@ services:
     environment:
       # === LLM CONFIGURATION ===
       - OPENCLAW_API_BASE_URL=http://lemonade:13305/v1
-      - OPENCLAW_MODEL=user.gemma-4-E2B-it-GGUF-Q4_K_M
-      - OPENCLAW_API_KEY=lemonade-local
+      - OPENCLAW_MODEL=${OPENCLAW_MODEL:-user.gemma-4-E2B-it-GGUF-Q4_K_M}
+      - OPENCLAW_API_KEY=${OPENCLAW_API_KEY:-lemonade-local}
       
       # === VECTOR STORE (Qdrant) ===
       - OPENCLAW_VECTOR_STORE=qdrant
@@ -22,8 +24,8 @@ services:
       - OPENCLAW_SEARXNG_URL=http://searxng:8080
       
       # === TELEGRAM NOTIFICATIONS ===
-      - TELEGRAM_BOT_TOKEN=your_bot_token_here
-      - TELEGRAM_CHAT_ID=your_chat_id_here
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
       - OPENCLAW_ENABLE_TELEGRAM=true
       
       # === WORKSPACE ===
@@ -57,7 +59,7 @@ services:
     networks:
       - proxy-network
     volumes:
-      - ./searxng:/etc/searxng:Z
+      - ./openclaw/searxng:/etc/searxng:Z
     environment:
       - SEARXNG_BASE_URL=http://localhost:8081
 
