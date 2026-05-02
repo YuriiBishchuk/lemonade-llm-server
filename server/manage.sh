@@ -46,7 +46,7 @@ EOF
 
     # Fix permissions before writing to ensure we have access
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
-    chmod -R 777 config workspace qdrant_data 2>/dev/null || true
+    sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
 
     # Always ensure OpenClaw JSON config is correct
     mkdir -p config
@@ -93,7 +93,9 @@ update_code() {
     fi
 
     CURRENT_SHA=""
-    [ -f version.txt ] && CURRENT_SHA=$(cat version.txt)
+    if [ -f version.txt ]; then
+        CURRENT_SHA=$(cat version.txt)
+    fi
 
     if [ "$LATEST_SHA" != "$CURRENT_SHA" ]; then
         echo -e "${BLUE}New version found ($LATEST_SHA). Downloading...${NC}"
@@ -101,6 +103,7 @@ update_code() {
         curl -L $GITHUB_TAR -o update.tar.gz
         mkdir -p update_tmp
         tar -xzf update.tar.gz -C update_tmp --strip-components=1
+        
         # Fix permissions before update to ensure we can overwrite files
         echo -e "${BLUE}Fixing permissions for update...${NC}"
         sudo chown -R $USER:$USER . 2>/dev/null || true
@@ -123,7 +126,7 @@ deploy() {
     docker network inspect proxy-network >/dev/null 2>&1 || \
         docker network create proxy-network
 
-    # Use 'docker compose' or 'podman-compose'
+    # Detect compose command
     COMPOSE_CMD="docker compose"
     if ! command -v docker-compose &> /dev/null && ! docker help compose &> /dev/null; then
         if command -v podman-compose &> /dev/null; then
