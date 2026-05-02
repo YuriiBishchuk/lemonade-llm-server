@@ -59,7 +59,7 @@ EOF
     },
     "auth": {
       "token": "lemonade-token",
-      "authorizedDevices": ["c3e02bac-2c56-4479-80bc-dc44e5a30dfa"]
+      "authorizedDevices": ["c3e02bac-2c56-4479-80bc-dc44e5a30dfa", "cf9bd3a2-e32e-413f-8242-a7cad682febf"]
     }
   },
   "channels": {
