@@ -138,7 +138,11 @@ deploy() {
     $COMPOSE_CMD -f docker-compose.openclaw.yml up -d --pull always
     
     echo -e "${GREEN}🚀 All services are up and running!${NC}"
-    echo -e "Web UI: http://$(hostname -I | awk '{print $1}'):3000"
+    IP_ADDR=$(hostname -I | awk '{print $1}')
+    echo -e "Web UI: http://$IP_ADDR:3000"
+    echo -e "Direct Login: ${BLUE}http://$IP_ADDR:3000/?token=lemonade-token${NC}"
+    echo -e "\nIf asked for device pairing, run:"
+    echo -e "${BLUE}podman exec openclaw openclaw devices approve <requestId>${NC}"
 }
 
 # --- Execution ---
