@@ -21,6 +21,11 @@ services:
       - OPENCLAW_SEARCH_ENGINE=searxng
       - OPENCLAW_SEARXNG_URL=http://searxng:8080
       
+      # === TELEGRAM NOTIFICATIONS ===
+      - TELEGRAM_BOT_TOKEN=your_bot_token_here
+      - TELEGRAM_CHAT_ID=your_chat_id_here
+      - OPENCLAW_ENABLE_TELEGRAM=true
+      
       # === WORKSPACE ===
       - OPENCLAW_WORKSPACE_DIR=/opt/openclaw/workspace
       

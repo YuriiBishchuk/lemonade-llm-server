@@ -137,6 +137,12 @@ To get the most out of your Vega 11:
 - **Dual-channel RAM**: Mandatory (doubles iGPU bandwidth).
 - **XMP/DOCP**: Enable to reduce memory latency.
 
+## Telegram Notifications
+To enable OpenClaw notifications:
+1. Create a bot via [@BotFather](https://t.me/BotFather) to get a `TELEGRAM_BOT_TOKEN`.
+2. Get your `CHAT_ID` via [@userinfobot](https://t.me/userinfobot).
+3. Update the values in `openclaw/docker-compose.yml`.
+
 ---
 
 ## License
