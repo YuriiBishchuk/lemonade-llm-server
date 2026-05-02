@@ -97,9 +97,12 @@ update_code() {
         curl -L $GITHUB_TAR -o update.tar.gz
         mkdir -p update_tmp
         tar -xzf update.tar.gz -C update_tmp --strip-components=1
+        # Fix permissions before update to ensure we can overwrite files
+        echo -e "${BLUE}Fixing permissions for update...${NC}"
+        sudo chown -R $USER:$USER . 2>/dev/null || true
         
-        # Use sudo for copy to avoid permission issues with mapped volumes
-        sudo cp -r update_tmp/server/* . 2>/dev/null || cp -r update_tmp/server/* .
+        # Copy content from the 'server' folder of the repo to current folder
+        cp -rf update_tmp/server/* .
         
         echo "$LATEST_SHA" > version.txt
         rm -rf update.tar.gz update_tmp
