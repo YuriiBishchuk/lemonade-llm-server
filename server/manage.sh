@@ -55,7 +55,7 @@ EOF
 {
   "gateway": {
     "controlUi": {
-      "allowedOrigins": ["*"]
+      "allowedOrigins": ["*", "http://192.168.0.11:3000", "http://localhost:3000"]
     },
     "auth": {
       "token": "lemonade-token",
