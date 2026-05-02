@@ -6,6 +6,10 @@ services:
     restart: always
     ports:
       - "13305:13305"
+    networks:
+      - proxy-network
+    extra_hosts:
+      - "host.containers.internal:host-gateway"
     devices:
       - /dev/dri:/dev/dri
     # CPUSet: pin to physical cores only (no hyperthreading siblings).
@@ -31,13 +35,15 @@ services:
 
       # === MLC-STYLE MATH TUNING ===
       # Larger compute graph = GPU does more work per CPU round-trip.
-      - GGML_VULKAN_MAX_NODES=8192
-      # FP16 math: doubles memory throughput on Vega, biggest single TPS boost.
+      # === EXTREME TURBO TUNING ===
+      # Larger graph for complex reasoning
+      - GGML_VULKAN_MAX_NODES=16384
+      # Optimal batch for Vega 11 (balances latency and throughput)
+      - GGML_VULKAN_MAX_BATCH_SIZE=512
+      # Multi-queue submission for AMD GCN/RDNA
+      - GGML_VULKAN_MAX_QUEUES=2
       - GGML_VULKAN_F16=1
-      # Disable correctness checks on every dispatch (safe for inference).
       - GGML_VULKAN_CHECK_RESULTS=0
-      # Vega 11 has no true matrix acceleration units.
-      # Force generic compute shaders which are faster on GCN/RDNA1.
       - GGML_VULKAN_WMMAMATRIX=0
 
       # === DEVICE ===
@@ -78,3 +84,7 @@ services:
 #   - GPL shader pre-compilation happens on first load — this is intentional.
 #   - Every subsequent run will be at maximum speed from token 1.
 # =====================================================================
+
+networks:
+  proxy-network:
+    external: true

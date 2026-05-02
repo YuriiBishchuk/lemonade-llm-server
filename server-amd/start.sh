@@ -18,8 +18,8 @@ echo "⏳ Waiting for server to initialize (first run compiles GPL shaders)..."
 sleep 10
 
 # Pull the model if not already cached
-echo "📦 Pulling model (Q4_0 variant for optimal inference speed)..."
-podman exec lemonade /opt/lemonade/lemonade pull unsloth/gemma-4-E2B-it-GGUF:Q4_0 || true
+echo "📦 Pulling model (Q4_K_S variant for maximum speed on AMD)..."
+podman exec lemonade /opt/lemonade/lemonade pull unsloth/gemma-4-E2B-it-GGUF:Q4_K_S || true
 
 echo ""
 echo "✅ Lemonade Server is running!"
