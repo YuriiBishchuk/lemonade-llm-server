@@ -25,6 +25,18 @@ chmod +x manage.sh
 
 ---
 
+## 🚚 Migration (Move to new path)
+
+If you need to move the entire project to a different directory or disk:
+1. Run the migration script:
+   ```bash
+   ./migrate.sh
+   ```
+2. Enter the new absolute path when prompted.
+3. The script will stop all services, copy everything to the new location, and restart the system there.
+
+---
+
 ## 📂 Project Structure
 ```
 lemonade/
