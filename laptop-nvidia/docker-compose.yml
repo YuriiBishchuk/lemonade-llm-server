@@ -2,7 +2,7 @@ services:
   lemonade-nvidia:
     build: .
     container_name: lemonade-nvidia
-    restart: unless-stopped
+    restart: always
     ports:
       - "13306:13305"
 

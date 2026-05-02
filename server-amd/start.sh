@@ -12,7 +12,7 @@ cd "$SCRIPT_DIR"
 mkdir -p lemonade-cache huggingface-cache llama-data shader-cache shader-cache-radv
 
 echo "🚀 Starting Lemonade Server (AMD Vega 11 — Extreme Vulkan Mode)..."
-podman-compose up -d
+podman compose up -d
 
 echo "⏳ Waiting for server to initialize (first run compiles GPL shaders)..."
 sleep 10
