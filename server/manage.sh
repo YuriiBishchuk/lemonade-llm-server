@@ -44,6 +44,10 @@ EOF
         echo -e "${GREEN}✅ .env file created.${NC}"
     fi
 
+    # Fix permissions before writing to ensure we have access
+    sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
+    chmod -R 777 config workspace qdrant_data 2>/dev/null || true
+
     # Always ensure OpenClaw JSON config is correct
     mkdir -p config
     cat > config/openclaw.json <<EOF
@@ -70,9 +74,8 @@ EOF
   }
 }
 EOF
-    # Fix permissions
+    # Set permissions back for the container user (1000)
     sudo chown -R 1000:1000 config workspace qdrant_data 2>/dev/null || true
-    chmod -R 777 config workspace qdrant_data 2>/dev/null || true
     
     echo -e "${GREEN}✅ OpenClaw configuration verified.${NC}"
 }
