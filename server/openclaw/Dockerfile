@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     imagemagick \
     # Node.js 20.x
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodecs \
+    && apt-get install -y nodejs \
     # .NET SDK 10.0 (The latest for 2026 projects)
     && wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
     && dpkg -i packages-microsoft-prod.deb \
