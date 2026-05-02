@@ -50,6 +50,7 @@ EOF
 
     # Always ensure OpenClaw JSON config is correct
     mkdir -p config
+    CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     cat > config/openclaw.json <<EOF
 {
   "gateway": {
@@ -68,7 +69,7 @@ EOF
   },
   "meta": {
     "lastTouchedVersion": "2026.4.29",
-    "lastTouchedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    "lastTouchedAt": "$CURRENT_DATE"
   }
 }
 EOF
@@ -91,9 +92,7 @@ update_code() {
     fi
 
     CURRENT_SHA=""
-    if [ -f version.txt ]; then
-        CURRENT_SHA=$(cat version.txt)
-    fi
+    [ -f version.txt ] && CURRENT_SHA=$(cat version.txt)
 
     if [ "$LATEST_SHA" != "$CURRENT_SHA" ]; then
         echo -e "${BLUE}New version found ($LATEST_SHA). Downloading...${NC}"
@@ -138,12 +137,10 @@ deploy() {
     echo -e "${BLUE}Starting OpenClaw...${NC}"
     $COMPOSE_CMD -f docker-compose.openclaw.yml up -d --pull always
     
-    echo -e "${GREEN}🚀 All services are up and running!${NC}"
     IP_ADDR=$(hostname -I | awk '{print $1}')
+    echo -e "${GREEN}🚀 All services are up and running!${NC}"
     echo -e "Web UI: http://$IP_ADDR:3000"
-    echo -e "Direct Login: ${BLUE}http://$IP_ADDR:3000/?token=lemonade-token${NC}"
-    echo -e "\nIf asked for device pairing, run:"
-    echo -e "${BLUE}podman exec openclaw openclaw devices approve <requestId>${NC}"
+    echo -e "Direct Login: http://$IP_ADDR:3000/?token=lemonade-token"
 }
 
 # --- Execution ---
