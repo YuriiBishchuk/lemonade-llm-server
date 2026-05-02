@@ -15,6 +15,8 @@ wget https://raw.githubusercontent.com/YuriiBishchuk/lemonade-llm-server/main/se
 chmod +x manage.sh
 ./manage.sh
 ```
+> [!TIP]
+> The project files will be deployed directly into the **same directory** where the script is located. It will not create a nested subfolder, allowing you to control the exact installation path.
 
 ### 2. What happens automatically:
 - **Interactive Setup**: On the first run, it will ask for your **Telegram Bot Token** and **Chat ID**.
