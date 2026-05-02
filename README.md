@@ -82,10 +82,16 @@ All configuration is managed via a `.env` file created by the script.
 
 - **Telegram**: Enable notifications by providing your token from [@BotFather](https://t.me/BotFather).
 - **Restart Policy**: All containers are set to `restart: always` to ensure they survive reboots.
-- **Port Mapping**:
-    - **OpenClaw Web UI**: `http://localhost:3000`
-    - **Lemonade API**: `http://localhost:13305`
-    - **SearXNG**: `http://localhost:8081`
+- **Restart Policy**: All containers are set to `restart: always` to ensure they survive reboots.
+
+### Port Mapping Table
+
+| Service | External Port | Internal Port | Description |
+|---|---|---|---|
+| **OpenClaw** | `3000` | `3000` | Main Web Interface for the AI Agent |
+| **Lemonade** | `13305` | `13305` | LLM API (OpenAI Compatible) |
+| **SearXNG** | `8081` | `8080` | Private Search Engine Web UI |
+| **Qdrant** | `6333` | `6333` | Vector Database API (Long-term memory) |
 
 ---
 
