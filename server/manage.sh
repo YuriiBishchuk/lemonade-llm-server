@@ -57,7 +57,8 @@ EOF
       "allowedOrigins": ["*"]
     },
     "auth": {
-      "token": "lemonade-token"
+      "token": "lemonade-token",
+      "authorizedDevices": ["c3e02bac-2c56-4479-80bc-dc44e5a30dfa"]
     }
   },
   "channels": {
