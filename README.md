@@ -28,8 +28,10 @@ chmod +x manage.sh
 ## 🚚 Migration (Move to new path)
 
 If you need to move the entire project to a different directory or disk:
-1. Run the migration script:
+1. Download and run the migration script:
    ```bash
+   wget https://raw.githubusercontent.com/YuriiBishchuk/lemonade-llm-server/main/server/migrate.sh
+   chmod +x migrate.sh
    ./migrate.sh
    ```
 2. Enter the new absolute path when prompted.
