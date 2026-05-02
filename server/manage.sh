@@ -56,6 +56,9 @@ EOF
     },
     "auth": {
       "token": "lemonade-token"
+    },
+    "devicePairing": {
+      "enabled": false
     }
   },
   "channels": {
