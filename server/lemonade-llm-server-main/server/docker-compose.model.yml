@@ -1,0 +1,52 @@
+services:
+  lemonade:
+    image: ghcr.io/lemonade-sdk/lemonade-server:latest
+    container_name: lemonade
+    restart: always
+    ports:
+      - "13305:13305"
+    networks:
+      - proxy-network
+    extra_hosts:
+      - "host.containers.internal:host-gateway"
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      # === BACKEND (Vulkan Baseline - The Speed King) ===
+      - LEMONADE_BACKEND=vulkan
+      - LEMONADE_LLAMACPP=vulkan
+      - GGML_VULKAN_DEVICE=0
+
+      # === APU OPTIMIZATIONS ===
+      # Critical for APUs: Zero-copy access to system RAM
+      - GGML_VULKAN_UNIFIED_MEMORY=1
+      - GGML_VULKAN_PINNED_MEMORY=1
+      
+      # === DRIVER TUNING ===
+      # Use Valve's ACO compiler + GPL for instant response
+      - RADV_PERFTEST=aco,gpl
+      - RADV_DEBUG=nocache_reuse
+      
+      # === HOST OPTIMIZATION ===
+      # Pinning to physical cores still helps Vulkan management
+      - OMP_NUM_THREADS=4
+
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      stack:
+        soft: -1
+        hard: -1
+
+    volumes:
+      - ./lemonade-cache:/root/.cache/lemonade:Z
+      - ./huggingface-cache:/root/.cache/huggingface:Z
+      - ./llama-data:/opt/lemonade/llama:Z
+      # Persistent shader cache for instant start after reboot
+      - ./shader-cache:/root/.cache/mesa_shader_cache:Z
+      - ./shader-cache-radv:/root/.cache/radv_builtin_shaders:Z
+
+networks:
+  proxy-network:
+    external: true

@@ -1,10 +1,12 @@
 services:
   openclaw:
-    image: ghcr.io/openclaw/openclaw:latest
+    build: 
+      context: ./openclaw
+      dockerfile: Dockerfile
     container_name: openclaw
     restart: always
     ports:
-      - "3000:18789" # Web UI
+      - "3000:3000" # Web UI
     networks:
       - proxy-network
     environment:
@@ -12,31 +14,30 @@ services:
       - OPENCLAW_API_BASE_URL=http://lemonade:13305/v1
       - OPENCLAW_MODEL=${OPENCLAW_MODEL:-user.gemma-4-E2B-it-GGUF-Q4_K_M}
       - OPENCLAW_API_KEY=${OPENCLAW_API_KEY:-lemonade-local}
-
+      
       # === VECTOR STORE (Qdrant) ===
       - OPENCLAW_VECTOR_STORE=qdrant
       - OPENCLAW_QDRANT_URL=http://qdrant:6333
-
+      
       # === WEB SEARCH (SearXNG - Free & Private) ===
       - OPENCLAW_SEARCH_ENGINE=searxng
       - OPENCLAW_SEARXNG_URL=http://searxng:8080
-
+      
       # === TELEGRAM NOTIFICATIONS ===
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
       - OPENCLAW_ENABLE_TELEGRAM=true
-
+      
       # === WORKSPACE ===
       - OPENCLAW_WORKSPACE_DIR=/opt/openclaw/workspace
-
+      
       # === SANDBOX / SECURITY ===
-      - OPENCLAW_ALLOWED_ORIGINS=["*","http://192.168.0.11:3000"]
-      - OPENCLAW_GATEWAY_AUTH_TOKEN=${OPENCLAW_TOKEN:-lemonade-token}
+      - OPENCLAW_ENABLE_SANDBOX=true
 
     volumes:
-      - ./config:/home/node/.openclaw:Z
+      - ./config:/root/.openclaw:Z
       - ./workspace:/opt/openclaw/workspace:Z
-      # - /var/run/docker.sock:/var/run/docker.sock:z
+      - /var/run/docker.sock:/var/run/docker.sock:z
 
   qdrant:
     image: qdrant/qdrant:latest
