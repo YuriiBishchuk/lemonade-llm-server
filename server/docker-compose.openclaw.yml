@@ -4,7 +4,7 @@ services:
     container_name: openclaw
     restart: always
     ports:
-      - "3000:3000" # Web UI
+      - "3000:18789" # Web UI
     networks:
       - proxy-network
     environment:
