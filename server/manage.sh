@@ -60,9 +60,11 @@ EOF
   "gateway": {
     "controlUi": {
       "allowedOrigins": ["*"],
-      "enabled": true
+      "enabled": true,
+      "dangerouslyDisableDeviceAuth": true
     },
     "auth": {
+      "mode": "none",
       "token": "lemonade-token"
     }
   }
