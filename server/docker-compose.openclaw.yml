@@ -30,8 +30,10 @@ services:
       - OPENCLAW_WORKSPACE_DIR=/opt/openclaw/workspace
 
       # === SANDBOX / SECURITY ===
-      - OPENCLAW_GATEWAY_CONTROLUI_ALLOWED_ORIGINS=*
-      - OPENCLAW_GATEWAY_AUTH_TOKEN=${OPENCLAW_TOKEN:-lemonade-token}
+      # Використовуємо подвійне підкреслення для правильного мапінгу в gateway.controlUi.allowedOrigins
+      - OPENCLAW_GATEWAY__CONTROLUI__ALLOWED_ORIGINS=*
+      # Те саме для токена авторизації
+      - OPENCLAW_GATEWAY__AUTH_TOKEN=${OPENCLAW_TOKEN:-lemonade-token}
 
     volumes:
       - ./config:/home/node/.openclaw:Z
