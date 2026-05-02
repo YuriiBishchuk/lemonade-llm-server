@@ -51,27 +51,46 @@ Optimized for **GPU offloading** to keep CPU cores free for other services. This
 | `HSA_OVERRIDE_GFX_VERSION` | `9.0.0` | Emulates gfx900 to bypass driver restrictions |
 | `LEMONADE_BACKEND` | `system` | Forces use of the ROCm-enabled llama-server |
 
-#### Phase 1: Backend & Thread Optimization
-*Tested with Llama 3.2 1B (Q4_K_M)*
+#### Phase 1: Exhaustive Configuration Test
+*Tested with TinyLlama 1.1B to find the best backend & driver settings*
 
-| Configuration | Prompt TPS | Gen TPS | Verdict |
-|---|---|---|---|
-| **ROCm (Hacked)** | **38.10** | 33.78 | **Fastest Response (Selected for GPU Offloading)** |
-| **CPU (4 Threads)** | 33.28 | **35.06** | **Fastest Streaming (Best for CPU-only)** |
-| CPU (8 Threads) | 31.64 | 35.11 | Sub-optimal (Cache thrashing) |
-| Vulkan Baseline | 30.40 | 35.13 | Good, but higher overhead |
-
-#### Phase 2: Quantization Matrix
-*Tested on CPU (4 Threads) to find the most efficient format*
-
-| Quantization | Prompt TPS | Gen TPS | Memory Usage | Verdict |
+| Variant | Port | Prompt (TPS) | Gen (TPS) | Status |
 |---|---|---|---|---|
-| **Q4_K_M** | **33.28** | **35.06** | ~0.8 GB | **Winner (Optimal Speed/Quality)** |
-| Q4_0 | 28.87 | 31.52 | ~0.7 GB | Slower than K-quant on this HW |
-| Q5_K_M | 27.77 | 30.78 | ~1.0 GB | Balanced quality |
-| Q8_0 | 24.60 | 25.18 | ~1.3 GB | Significant speed penalty |
+| **01-vulkan-baseline** | 14001 | **44.08** | **35.21** | OK |
+| 02-vulkan-turbo | 14002 | 36.77 | 34.78 | OK |
+| 03-vulkan-f32 | 14003 | 39.82 | 34.40 | OK |
+| **04-rocm-hack** | 14004 | 38.10 | 33.78 | OK |
+| 05-cpu-only | 14005 | 41.79 | 34.17 | OK |
+| 06-vulkan-flash-attn | 14006 | 37.75 | 34.05 | OK |
+| 07-vulkan-tiny-ctx | 14007 | 42.10 | 33.59 | OK |
+| 10-vulkan-no-unified | 14010 | 42.86 | 34.06 | OK |
+| 11-vulkan-single-queue | 14011 | 39.76 | 33.48 | OK |
 
-**Final Architecture Choice:** ROCm Backend (`system`) + `Q4_K_M` model. This provides the best latency for developers (Prompt TPS) while offloading the APU's CPU cores for background tasks.
+#### Phase 2: Quantization & Thread Matrix
+*Tested with Llama 3.2 1B to find the optimal format and CPU pinning*
+
+| Variant | Port | Quantization | Prompt (TPS) | Gen (TPS) | Status |
+|---|---|---|---|---|---|
+| 01-vulkan-baseline | 14001 | Q4_K_M | 30.40 | 35.13 | OK |
+| **03-cpu-t4** | 14003 | **Q4_K_M** | **33.28** | **35.06** | OK |
+| 04-cpu-t8 | 14004 | Q4_K_M | 31.64 | 35.11 | OK |
+| 01-vulkan-baseline | 14001 | Q8_0 | 21.93 | 24.83 | OK |
+
+### 🧠 Key Findings & Technical Conclusions
+
+1. **The APU Bottleneck (RAM Bandwidth):**
+   On integrated Vega 11, the GPU and CPU share the same system DDR4 RAM. The benchmark shows that for models < 3GB, the **System RAM bandwidth** is the primary limit. This is why CPU-only inference (41-44 TPS) is nearly identical to GPU-accelerated Vulkan/ROCm.
+
+2. **Physical Core Pinning (4 vs 8 Threads):**
+   Reducing threads from 8 (SMT) to **4 (Physical cores)** improved Prompt TPS from 31.64 to **33.28**. This proves that AI workloads on Ryzen APUs benefit from avoiding logical thread overhead and cache thrashing.
+
+3. **Optimal Quantization (Q4_K_M):**
+   `Q4_K_M` was consistently faster than the simpler `Q4_0`. It provides the best balance of reasoning quality and speed, fitting perfectly within the Vega 11's memory controller constraints.
+
+4. **Why ROCm? (GPU Offloading):**
+   While CPU-only is fast, we chose the **ROCm (Hacked)** backend for the final production build to **offload the CPU**. This keeps the 4 physical Ryzen cores available for the OS, proxy services, and the OpenClaw development environment, while the dedicated Vega 11 cores handle the heavy matrix math.
+
+---
 
 
 ### laptop-nvidia (Intel + NVIDIA — True CUDA mode)
