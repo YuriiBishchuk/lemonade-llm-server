@@ -37,7 +37,7 @@ services:
     volumes:
       - ./config:/root/.openclaw:Z
       - ./workspace:/opt/openclaw/workspace:Z
-      - /var/run/docker.sock:/var/run/docker.sock:z
+      # - /var/run/docker.sock:/var/run/docker.sock:z
 
   qdrant:
     image: qdrant/qdrant:latest
