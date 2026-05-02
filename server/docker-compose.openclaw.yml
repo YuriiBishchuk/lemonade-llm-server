@@ -30,7 +30,7 @@ services:
       - OPENCLAW_WORKSPACE_DIR=/opt/openclaw/workspace
       
       # === SANDBOX / SECURITY ===
-      - OPENCLAW_GATEWAY_CONTROL_UI_ALLOWED_ORIGINS=*
+      - OPENCLAW_GATEWAY_CONTROL_UI_ALLOWED_ORIGINS=["*","http://192.168.0.11:3000"]
       - OPENCLAW_GATEWAY_AUTH_TOKEN=${OPENCLAW_TOKEN:-lemonade-token}
 
     volumes:
