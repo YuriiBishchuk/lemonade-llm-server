@@ -11,7 +11,7 @@ The project is now unified into a single management system. You no longer need t
 ### 1. Bootstrap
 Just copy the `manage.sh` script to your server and run it:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YuriiBishchuk/lemonade-llm-server/main/server/manage.sh -o manage.sh
+curl -fsSL "https://raw.githubusercontent.com/YuriiBishchuk/lemonade-llm-server/main/server/manage.sh?v=$(date +%s)" -o manage.sh
 chmod +x manage.sh
 ./manage.sh
 ```
@@ -32,7 +32,7 @@ chmod +x manage.sh
 If you need to move the entire project to a different directory or disk:
 1. Download and run the migration script:
    ```bash
-   curl -fsSL https://raw.githubusercontent.com/YuriiBishchuk/lemonade-llm-server/main/server/migrate.sh -o migrate.sh
+   curl -fsSL "https://raw.githubusercontent.com/YuriiBishchuk/lemonade-llm-server/main/server/migrate.sh?v=$(date +%s)" -o migrate.sh
    chmod +x migrate.sh
    ./migrate.sh
    ```
