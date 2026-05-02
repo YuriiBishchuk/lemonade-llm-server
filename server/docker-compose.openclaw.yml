@@ -32,15 +32,17 @@ services:
 
       # === SANDBOX / SECURITY ===
       - OPENCLAW_GATEWAY__CONTROL_UI__ALLOWED_ORIGINS=["*"]
+      - OPENCLAW_GATEWAY_CONTROL_UI_ALLOWED_ORIGINS=*
+      - OPENCLAW_GATEWAY_CONTROLUI_ALLOWEDORIGINS=*
       - OPENCLAW_GATEWAY__CONTROL_UI__ENABLED=true
       - OPENCLAW_GATEWAY__DEVICE_PAIRING__ENABLED=false
       - OPENCLAW_GATEWAY_DEVICE_PAIRING_ENABLED=false
       - OPENCLAW_GATEWAY_DEVICEPAIRING_ENABLED=false
       - OPENCLAW_GATEWAY__AUTH__TOKEN=${OPENCLAW_TOKEN:-lemonade-token}
       - OPENCLAW_GATEWAY_AUTH_TOKEN=${OPENCLAW_TOKEN:-lemonade-token}
+      - OPENCLAW_GATEWAY_PUBLIC_URL=http://192.168.0.11:3000
 
     volumes:
-      - ./config:/root/.openclaw:Z
       - ./workspace:/opt/openclaw/workspace:Z
       # - /var/run/docker.sock:/var/run/docker.sock:z
 

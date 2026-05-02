@@ -48,38 +48,11 @@ EOF
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
 
-    # Always ensure OpenClaw JSON config is correct
-    mkdir -p config
-    CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    cat > config/openclaw.json <<EOF
-{
-  "gateway": {
-    "controlUi": {
-      "allowedOrigins": ["*", "http://192.168.0.11:3000", "http://localhost:3000"]
-    },
-    "auth": {
-      "token": "lemonade-token",
-      "authorizedDevices": ["c3e02bac-2c56-4479-80bc-dc44e5a30dfa", "cf9bd3a2-e32e-413f-8242-a7cad682febf"]
-    },
-    "devicePairing": { "enabled": false },
-    "devicePair": { "enabled": false }
-  },
-  "channels": {
-    "telegram": {
-      "enabled": true
-    }
-  },
-  "meta": {
-    "lastTouchedVersion": "2026.4.29",
-    "lastTouchedAt": "$CURRENT_DATE"
-  }
-}
-EOF
-    # Set permissions for root
-    sudo chown -R root:root config workspace qdrant_data 2>/dev/null || true
-    sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
+    # Fix permissions for workspace
+    sudo chown -R root:root workspace qdrant_data 2>/dev/null || true
+    sudo chmod -R 777 workspace qdrant_data 2>/dev/null || true
     
-    echo -e "${GREEN}✅ OpenClaw configuration verified.${NC}"
+    echo -e "${GREEN}✅ Environment verified.${NC}"
 }
 
 # 3. Update Code from GitHub
