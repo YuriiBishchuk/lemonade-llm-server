@@ -32,10 +32,5 @@ RUN apt-get update && apt-get install -y \
 
 # Set environment variables for the tools
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
-ENV PATH="$PATH:/usr/local/bin"
 
-# Switch back to the default user if necessary, 
-# but for a dev-agent root is often more practical for installs
-USER root
-
-WORKDIR /opt/openclaw
+# We do NOT change WORKDIR or CMD to preserve the base image's entrypoint
