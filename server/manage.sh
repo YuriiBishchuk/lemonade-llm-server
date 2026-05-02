@@ -52,14 +52,15 @@ EOF
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
 
-    # Create the proper openclaw.json
+    # Create BOTH openclaw.json and config.json to be sure
     mkdir -p config
     CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    cat > config/openclaw.json <<EOF
+    CONFIG_CONTENT=$(cat <<EOF
 {
   "gateway": {
     "controlUi": {
-      "allowedOrigins": ["*"]
+      "allowedOrigins": ["*"],
+      "enabled": true
     },
     "auth": {
       "token": "lemonade-token",
@@ -71,18 +72,12 @@ EOF
     "devicePairing": {
       "enabled": false
     }
-  },
-  "channels": {
-    "telegram": {
-      "enabled": true
-    }
-  },
-  "meta": {
-    "lastTouchedVersion": "2026.4.29",
-    "lastTouchedAt": "$CURRENT_DATE"
   }
 }
 EOF
+)
+    echo "$CONFIG_CONTENT" > config/openclaw.json
+    echo "$CONFIG_CONTENT" > config/config.json
     
     echo -e "${GREEN}✅ Configuration verified.${NC}"
 }
