@@ -48,8 +48,8 @@ EOF
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
 
-    # Fix permissions for workspace
-    sudo chown -R root:root workspace qdrant_data 2>/dev/null || true
+    # Fix permissions for workspace and data (for the host user)
+    sudo chown -R $USER:$USER workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 workspace qdrant_data 2>/dev/null || true
     
     echo -e "${GREEN}✅ Environment verified.${NC}"
