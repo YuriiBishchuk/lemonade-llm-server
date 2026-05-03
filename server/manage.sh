@@ -60,8 +60,8 @@ EOF
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
 
-    # Direct JSON generation for maximum reliability
-    echo -e "${BLUE}Generating OpenClaw configuration...${NC}"
+    # Clean, minimal Gateway config for 2026.x
+    echo -e "${BLUE}Generating OpenClaw Gateway configuration...${NC}"
     mkdir -p config
     cat > config/openclaw.json <<EOF
 {
@@ -86,42 +86,13 @@ EOF
     # Restart OpenClaw to pick up NEW config
     $COMPOSE_CMD -f docker-compose.openclaw.yml restart openclaw
     
-    # Wait for gateway to be ready
-    echo -e "${BLUE}Waiting for gateway to be ready...${NC}"
-    sleep 5
-    
-    # Create agent-specific directory structure
-    echo -e "${BLUE}Configuring agent 'main'...${NC}"
-    AGENT_DIR="workspace/agents/main/agent"
-    mkdir -p "$AGENT_DIR"
-    
-    # Write auth profiles (providers)
-    cat > "$AGENT_DIR/auth-profiles.json" <<EOF
-{
-  "profiles": {
-    "custom": {
-      "id": "custom",
-      "name": "Lemonade",
-      "baseUrl": "http://lemonade:13305/v1",
-      "apiKey": "lemonade-local",
-      "compatibility": "openai"
-    }
-  }
-}
-EOF
-
-    # Write agent config (default model)
-    cat > "$AGENT_DIR/config.json" <<EOF
-{
-  "model": "custom/user.gemma-4-E2B-it-GGUF-Q4_K_M"
-}
-EOF
-    
     # Ensure proper permissions
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
     
-    echo -e "${GREEN}✅ Configuration generated and model registered.${NC}"
+    echo -e "${GREEN}✅ Gateway initialized with Pairing and CORS bypass.${NC}"
+    echo -e "${BLUE}TIP: To add your model interactively, run:${NC}"
+    echo -e "podman exec -it openclaw openclaw models auth add"
 }
 
 # 3. Update Code from GitHub
