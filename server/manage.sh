@@ -45,7 +45,7 @@ init_env() {
         cat > .env <<EOF
 TELEGRAM_BOT_TOKEN=$TG_TOKEN
 TELEGRAM_CHAT_ID=$TG_CHAT_ID
-OPENCLAW_MODEL=gemma-2-9b-it-Q4_K_M.gguf
+OPENCLAW_MODEL=user.gemma-4-e2b-it-Q4_K_M-GGUF
 OPENCLAW_API_KEY=lemonade-local
 OPENCLAW_TOKEN=lemonade-token
 EOF
@@ -54,7 +54,7 @@ EOF
 
     # 2.5 Download Model if missing
     download_model() {
-        MODEL_NAME="gemma-2-9b-it-Q4_K_M.gguf"
+        MODEL_NAME="user.gemma-4-e2b-it-Q4_K_M-GGUF"
         MODEL_URL="https://huggingface.co/bartowski/gemma-2-9b-it-GGUF/resolve/main/gemma-2-9b-it-Q4_K_M.gguf"
         
         mkdir -p llama-data

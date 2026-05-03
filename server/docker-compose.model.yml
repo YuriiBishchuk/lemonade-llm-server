@@ -32,9 +32,10 @@ services:
       - OMP_NUM_THREADS=4
       
       # === MODEL CONFIGURATION ===
-      - LEMONADE_MODEL=/opt/lemonade/llama/${OPENCLAW_MODEL:-gemma-2-9b-it-Q4_K_M.gguf}
+      - LEMONADE_MODEL=/opt/lemonade/llama/${OPENCLAW_MODEL:-user.gemma-4-e2b-it-Q4_K_M-GGUF}
       - LEMONADE_PORT=13305
       - LEMONADE_HOST=0.0.0.0
+      - LEMONADE_CTX_SIZE=32768
 
     ulimits:
       memlock:
