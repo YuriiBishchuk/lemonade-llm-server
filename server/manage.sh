@@ -105,6 +105,9 @@ EOF
     # Also create config.json just in case
     cp config/openclaw.json config/config.json
     
+    # Restart OpenClaw to pick up NEW config
+    $COMPOSE_CMD -f docker-compose.openclaw.yml restart openclaw
+    
     # Ensure proper permissions
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
