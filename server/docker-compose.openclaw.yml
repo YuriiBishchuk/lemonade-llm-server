@@ -1,6 +1,6 @@
 services:
   openclaw:
-    image: ghcr.io/openclaw/openclaw:2026.4.29
+    image: ghcr.io/openclaw/openclaw:latest
     container_name: openclaw
     user: root
     restart: always
