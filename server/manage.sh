@@ -52,28 +52,35 @@ EOF
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
 
-    # Create BOTH openclaw.json and config.json to be sure
-    mkdir -p config
-    CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    CONFIG_CONTENT=$(cat <<EOF
-{
-  "gateway": {
-    "controlUi": {
-      "allowedOrigins": ["*"],
-      "enabled": true
-    },
-    "auth": {
-      "mode": "token",
-      "token": "lemonade-token"
-    }
-  }
-}
-EOF
-)
-    echo "$CONFIG_CONTENT" > config/openclaw.json
-    echo "$CONFIG_CONTENT" > config/config.json
+    # Instead of manual JSON, use the official onboard CLI to generate the config
+    # This is MUCH more reliable for the latest versions
+    echo -e "${BLUE}Initializing OpenClaw via onboard CLI...${NC}"
     
-    echo -e "${GREEN}✅ Configuration verified.${NC}"
+    # We need to ensure the container is running to execute the CLI
+    $COMPOSE_CMD -f docker-compose.openclaw.yml up -d openclaw
+    
+    # Wait for container to be ready
+    sleep 3
+    
+    # Run onboard with all necessary flags
+    $COMPOSE_CMD -f docker-compose.openclaw.yml exec -T openclaw openclaw onboard \
+      --non-interactive \
+      --accept-risk \
+      --gateway-auth token \
+      --gateway-token lemonade-token \
+      --gateway-bind lan \
+      --custom-base-url http://lemonade:13305/v1 \
+      --custom-model-id user.gemma-4-E2B-it-GGUF-Q4_K_M \
+      --custom-compatibility openai \
+      --skip-skills \
+      --skip-daemon \
+      --skip-health || true
+    
+    # Final fix for permissions after onboard
+    sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
+    sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
+    
+    echo -e "${GREEN}✅ Configuration initialized via onboard.${NC}"
 }
 
 # 3. Update Code from GitHub
