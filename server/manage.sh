@@ -86,11 +86,24 @@ EOF
     # Restart OpenClaw to pick up NEW config
     $COMPOSE_CMD -f docker-compose.openclaw.yml restart openclaw
     
+    # Wait for gateway to be ready
+    echo -e "${BLUE}Waiting for gateway to be ready...${NC}"
+    sleep 5
+    
+    # Register the model provider via CLI (Safe for 2026.x)
+    echo -e "${BLUE}Registering Lemonade model provider...${NC}"
+    podman exec openclaw openclaw providers add custom \
+      --name Lemonade \
+      --url http://lemonade:13305/v1 \
+      --key lemonade-local \
+      --compatibility openai \
+      --model user.gemma-4-E2B-it-GGUF-Q4_K_M || true
+    
     # Ensure proper permissions
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
     
-    echo -e "${GREEN}✅ Configuration generated and patched.${NC}"
+    echo -e "${GREEN}✅ Configuration generated and model registered.${NC}"
 }
 
 # 3. Update Code from GitHub
