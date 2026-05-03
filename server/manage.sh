@@ -45,12 +45,28 @@ init_env() {
         cat > .env <<EOF
 TELEGRAM_BOT_TOKEN=$TG_TOKEN
 TELEGRAM_CHAT_ID=$TG_CHAT_ID
-OPENCLAW_MODEL=user.gemma-4-E2B-it-GGUF-Q4_K_M
+OPENCLAW_MODEL=gemma-2-9b-it-Q4_K_M.gguf
 OPENCLAW_API_KEY=lemonade-local
 OPENCLAW_TOKEN=lemonade-token
 EOF
         echo -e "${GREEN}✅ .env file created.${NC}"
     fi
+
+    # 2.5 Download Model if missing
+    download_model() {
+        MODEL_NAME="gemma-2-9b-it-Q4_K_M.gguf"
+        MODEL_URL="https://huggingface.co/bartowski/gemma-2-9b-it-GGUF/resolve/main/gemma-2-9b-it-Q4_K_M.gguf"
+        
+        mkdir -p llama-data
+        if [ ! -f "llama-data/$MODEL_NAME" ]; then
+            echo -e "${BLUE}Model $MODEL_NAME not found. Downloading (approx 5.4GB)...${NC}"
+            curl -L "$MODEL_URL" -o "llama-data/$MODEL_NAME"
+            echo -e "${GREEN}✅ Model downloaded.${NC}"
+        else
+            echo -e "${GREEN}✅ Model $MODEL_NAME already exists.${NC}"
+        fi
+    }
+    download_model
 
     # Fix permissions before writing to ensure we have access
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true

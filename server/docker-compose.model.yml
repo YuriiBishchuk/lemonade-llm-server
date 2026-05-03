@@ -30,6 +30,11 @@ services:
       # === HOST OPTIMIZATION ===
       # Pinning to physical cores still helps Vulkan management
       - OMP_NUM_THREADS=4
+      
+      # === MODEL CONFIGURATION ===
+      - LEMONADE_MODEL=/opt/lemonade/llama/${OPENCLAW_MODEL:-gemma-2-9b-it-Q4_K_M.gguf}
+      - LEMONADE_PORT=13305
+      - LEMONADE_HOST=0.0.0.0
 
     ulimits:
       memlock:

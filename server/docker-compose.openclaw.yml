@@ -11,7 +11,7 @@ services:
     environment:
       # === LLM CONFIGURATION ===
       - OPENCLAW_API_BASE_URL=http://lemonade:13305/v1
-      - OPENCLAW_MODEL=${OPENCLAW_MODEL:-user.gemma-4-E2B-it-GGUF-Q4_K_M}
+      - OPENCLAW_MODEL=${OPENCLAW_MODEL:-gemma-2-9b-it-Q4_K_M.gguf}
       - OPENCLAW_API_KEY=${OPENCLAW_API_KEY:-lemonade-local}
 
       # === VECTOR STORE (Qdrant) ===
