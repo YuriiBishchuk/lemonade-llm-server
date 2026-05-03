@@ -92,12 +92,11 @@ EOF
     
     # Register the model provider via CLI (Safe for 2026.x)
     echo -e "${BLUE}Registering Lemonade model provider...${NC}"
-    podman exec openclaw openclaw providers add custom \
+    podman exec openclaw openclaw agents add custom \
       --name Lemonade \
       --url http://lemonade:13305/v1 \
       --key lemonade-local \
-      --compatibility openai \
-      --model user.gemma-4-E2B-it-GGUF-Q4_K_M || true
+      --compatibility openai || true
     
     # Ensure proper permissions
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
