@@ -90,30 +90,32 @@ EOF
     echo -e "${BLUE}Waiting for gateway to be ready...${NC}"
     sleep 5
     
-    # Register the model provider, memory, and search via config patch
-    echo -e "${BLUE}Registering services (Model, Memory, Search)...${NC}"
-    echo '{
-      "providers": {
-        "custom": {
-          "id": "custom",
-          "name": "Lemonade",
-          "baseUrl": "http://lemonade:13305/v1",
-          "apiKey": "lemonade-local",
-          "compatibility": "openai"
-        }
-      },
-      "agent": {
-        "model": "custom/user.gemma-4-E2B-it-GGUF-Q4_K_M"
-      },
-      "vectorStore": {
-        "provider": "qdrant",
-        "url": "http://qdrant:6333"
-      },
-      "search": {
-        "provider": "searxng",
-        "url": "http://searxng:8080"
-      }
-    }' | podman exec -i openclaw openclaw config patch --stdin || true
+    # Create agent-specific directory structure
+    echo -e "${BLUE}Configuring agent 'main'...${NC}"
+    AGENT_DIR="workspace/agents/main/agent"
+    mkdir -p "$AGENT_DIR"
+    
+    # Write auth profiles (providers)
+    cat > "$AGENT_DIR/auth-profiles.json" <<EOF
+{
+  "profiles": {
+    "custom": {
+      "id": "custom",
+      "name": "Lemonade",
+      "baseUrl": "http://lemonade:13305/v1",
+      "apiKey": "lemonade-local",
+      "compatibility": "openai"
+    }
+  }
+}
+EOF
+
+    # Write agent config (default model)
+    cat > "$AGENT_DIR/config.json" <<EOF
+{
+  "model": "custom/user.gemma-4-E2B-it-GGUF-Q4_K_M"
+}
+EOF
     
     # Ensure proper permissions
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
