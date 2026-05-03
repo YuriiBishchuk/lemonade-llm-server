@@ -65,9 +65,6 @@ EOF
     "auth": {
       "mode": "token",
       "token": "lemonade-token"
-    },
-    "devicePairing": {
-      "enabled": true
     }
   }
 }
