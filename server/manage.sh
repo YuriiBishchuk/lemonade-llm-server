@@ -90,13 +90,22 @@ EOF
     echo -e "${BLUE}Waiting for gateway to be ready...${NC}"
     sleep 5
     
-    # Register the model provider via CLI (Safe for 2026.x)
+    # Register the model provider via config patch (Safe for 2026.x)
     echo -e "${BLUE}Registering Lemonade model provider...${NC}"
-    podman exec openclaw openclaw agents add custom \
-      --name Lemonade \
-      --url http://lemonade:13305/v1 \
-      --key lemonade-local \
-      --compatibility openai || true
+    echo '{
+      "providers": {
+        "custom": {
+          "id": "custom",
+          "name": "Lemonade",
+          "baseUrl": "http://lemonade:13305/v1",
+          "apiKey": "lemonade-local",
+          "compatibility": "openai"
+        }
+      },
+      "agent": {
+        "model": "custom/user.gemma-4-E2B-it-GGUF-Q4_K_M"
+      }
+    }' | podman exec -i openclaw openclaw config patch --stdin || true
     
     # Ensure proper permissions
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
