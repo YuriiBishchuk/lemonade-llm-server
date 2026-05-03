@@ -80,6 +80,7 @@ EOF
       --custom-base-url http://lemonade:13305/v1 \
       --custom-model-id user.gemma-4-E2B-it-GGUF-Q4_K_M \
       --custom-compatibility openai \
+      --custom-api-key lemonade-local \
       --skip-skills \
       --skip-daemon \
       --skip-health || true
