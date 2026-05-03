@@ -60,45 +60,37 @@ EOF
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
 
-    # Instead of manual JSON, use the official onboard CLI to generate the config
-    # This is MUCH more reliable for the latest versions
-    echo -e "${BLUE}Initializing OpenClaw via onboard CLI...${NC}"
+    # Direct JSON generation for maximum reliability
+    echo -e "${BLUE}Generating OpenClaw configuration...${NC}"
+    mkdir -p config
+    cat > config/openclaw.json <<EOF
+{
+  "gateway": {
+    "bind": "lan",
+    "port": 18789,
+    "controlUi": {
+      "enabled": true,
+      "allowedOrigins": ["*"],
+      "dangerouslyDisableDeviceAuth": true
+    },
+    "auth": {
+      "mode": "token",
+      "token": "lemonade-token"
+    }
+  },
+  "workspace": {
+    "dir": "/opt/openclaw/workspace"
+  }
+}
+EOF
+    # Also create config.json just in case
+    cp config/openclaw.json config/config.json
     
-    # We need to ensure the container is running to execute the CLI
-    $COMPOSE_CMD -f docker-compose.openclaw.yml up -d openclaw
-    
-    # Wait for container to be ready
-    sleep 3
-    
-    # Run onboard with all necessary flags
-    $COMPOSE_CMD -f docker-compose.openclaw.yml exec -T openclaw openclaw onboard \
-      --non-interactive \
-      --accept-risk \
-      --gateway-auth token \
-      --gateway-token lemonade-token \
-      --gateway-bind lan \
-      --custom-base-url http://lemonade:13305/v1 \
-      --custom-model-id user.gemma-4-E2B-it-GGUF-Q4_K_M \
-      --custom-compatibility openai \
-      --custom-api-key lemonade-local \
-      --skip-skills \
-      --skip-daemon \
-      --skip-health || true
-    
-    # APPLY DANGEROUS BYPASS (Final Boss Fix)
-    # This disables the broken device pairing check while keeping token auth
-    echo -e "${BLUE}Applying device pairing bypass...${NC}"
-    sed -i '/"controlUi": {/a \      "allowedOrigins": ["*"],\n      "dangerouslyDisableDeviceAuth": true,' config/openclaw.json 2>/dev/null || true
-    sed -i '/"controlUi": {/a \      "allowedOrigins": ["*"],\n      "dangerouslyDisableDeviceAuth": true,' config/config.json 2>/dev/null || true
-    
-    # Restart OpenClaw to pick up new config
-    $COMPOSE_CMD -f docker-compose.openclaw.yml restart openclaw
-    
-    # Final fix for permissions after onboard
+    # Ensure proper permissions
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
     
-    echo -e "${GREEN}✅ Configuration initialized and patched.${NC}"
+    echo -e "${GREEN}✅ Configuration generated and patched.${NC}"
 }
 
 # 3. Update Code from GitHub
