@@ -16,6 +16,14 @@ NC='\033[0m' # No Color
 
 echo -e "${BLUE}🍋 Lemonade Unified Server Manager${NC}"
 
+# Detect compose command early
+COMPOSE_CMD="docker compose"
+if ! command -v docker-compose &> /dev/null && ! docker help compose &> /dev/null; then
+    if command -v podman-compose &> /dev/null; then
+        COMPOSE_CMD="podman-compose"
+    fi
+fi
+
 # 1. Check Dependencies
 check_dependencies() {
     for cmd in curl tar docker; do
@@ -126,14 +134,7 @@ deploy() {
     docker network inspect proxy-network >/dev/null 2>&1 || \
         docker network create proxy-network
 
-    # Detect compose command
-    COMPOSE_CMD="docker compose"
-    if ! command -v docker-compose &> /dev/null && ! docker help compose &> /dev/null; then
-        if command -v podman-compose &> /dev/null; then
-            COMPOSE_CMD="podman-compose"
-        fi
-    fi
-
+    # We already detected COMPOSE_CMD at the start
     echo -e "${BLUE}Starting Lemonade Model...${NC}"
     $COMPOSE_CMD -f docker-compose.model.yml up -d --pull always
 
