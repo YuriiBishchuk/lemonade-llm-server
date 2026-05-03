@@ -90,8 +90,8 @@ EOF
     echo -e "${BLUE}Waiting for gateway to be ready...${NC}"
     sleep 5
     
-    # Register the model provider via config patch (Safe for 2026.x)
-    echo -e "${BLUE}Registering Lemonade model provider...${NC}"
+    # Register the model provider, memory, and search via config patch
+    echo -e "${BLUE}Registering services (Model, Memory, Search)...${NC}"
     echo '{
       "providers": {
         "custom": {
@@ -104,6 +104,14 @@ EOF
       },
       "agent": {
         "model": "custom/user.gemma-4-E2B-it-GGUF-Q4_K_M"
+      },
+      "vectorStore": {
+        "provider": "qdrant",
+        "url": "http://qdrant:6333"
+      },
+      "search": {
+        "provider": "searxng",
+        "url": "http://searxng:8080"
       }
     }' | podman exec -i openclaw openclaw config patch --stdin || true
     
