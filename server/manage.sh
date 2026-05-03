@@ -88,8 +88,8 @@ EOF
     # APPLY DANGEROUS BYPASS (Final Boss Fix)
     # This disables the broken device pairing check while keeping token auth
     echo -e "${BLUE}Applying device pairing bypass...${NC}"
-    sed -i '/"controlUi": {/a \      "dangerouslyDisableDeviceAuth": true,' config/openclaw.json 2>/dev/null || true
-    sed -i '/"controlUi": {/a \      "dangerouslyDisableDeviceAuth": true,' config/config.json 2>/dev/null || true
+    sed -i '/"controlUi": {/a \      "allowedOrigins": ["*"],\n      "dangerouslyDisableDeviceAuth": true,' config/openclaw.json 2>/dev/null || true
+    sed -i '/"controlUi": {/a \      "allowedOrigins": ["*"],\n      "dangerouslyDisableDeviceAuth": true,' config/config.json 2>/dev/null || true
     
     # Final fix for permissions after onboard
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
