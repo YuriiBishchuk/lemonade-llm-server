@@ -91,11 +91,14 @@ EOF
     sed -i '/"controlUi": {/a \      "allowedOrigins": ["*"],\n      "dangerouslyDisableDeviceAuth": true,' config/openclaw.json 2>/dev/null || true
     sed -i '/"controlUi": {/a \      "allowedOrigins": ["*"],\n      "dangerouslyDisableDeviceAuth": true,' config/config.json 2>/dev/null || true
     
+    # Restart OpenClaw to pick up new config
+    $COMPOSE_CMD -f docker-compose.openclaw.yml restart openclaw
+    
     # Final fix for permissions after onboard
     sudo chown -R $USER:$USER config workspace qdrant_data 2>/dev/null || true
     sudo chmod -R 777 config workspace qdrant_data 2>/dev/null || true
     
-    echo -e "${GREEN}✅ Configuration initialized via onboard.${NC}"
+    echo -e "${GREEN}✅ Configuration initialized and patched.${NC}"
 }
 
 # 3. Update Code from GitHub
