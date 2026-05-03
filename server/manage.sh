@@ -78,6 +78,25 @@ EOF
       "token": "lemonade-token"
     }
   },
+  "providers": {
+    "custom": {
+      "id": "custom",
+      "name": "Lemonade",
+      "baseUrl": "http://lemonade:13305/v1",
+      "apiKey": "lemonade-local",
+      "compatibility": "openai",
+      "models": [
+        {
+          "id": "user.gemma-4-E2B-it-GGUF-Q4_K_M",
+          "name": "Gemma 4 E2B",
+          "contextWindow": 8192
+        }
+      ]
+    }
+  },
+  "agent": {
+    "model": "custom/user.gemma-4-E2B-it-GGUF-Q4_K_M"
+  },
   "workspace": {
     "dir": "/opt/openclaw/workspace"
   }
